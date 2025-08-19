@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Container,
   Typography,
@@ -8,6 +8,10 @@ import {
   Card,
   CardContent,
   Button,
+  TextField,
+  Alert,
+  CircularProgress,
+  Snackbar,
 } from '@mui/material'
 import EmailIcon from '@mui/icons-material/Email'
 import PhoneIcon from '@mui/icons-material/Phone'
@@ -15,6 +19,65 @@ import LocationOnIcon from '@mui/icons-material/LocationOn'
 import SendIcon from '@mui/icons-material/Send'
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus({ type: '', message: '' })
+
+    try {
+      const response = await fetch('http://localhost:5163/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (response.ok) {
+        setSubmitStatus({ 
+          type: 'success', 
+          message: 'Message sent successfully! We\'ll get back to you soon.' 
+        })
+        setFormData({ name: '', email: '', message: '' })
+      } else {
+        const errorData = await response.json()
+        setSubmitStatus({ 
+          type: 'error', 
+          message: errorData.message || 'Failed to send message. Please try again.' 
+        })
+      }
+    } catch (error) {
+      setSubmitStatus({ 
+        type: 'error', 
+        message: 'Network error. Please check your connection and try again.' 
+      })
+    } finally {
+      setIsSubmitting(false)
+      setSnackbarOpen(true)
+    }
+  }
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false)
+  }
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header Section */}
@@ -79,57 +142,65 @@ const Contact = () => {
           </Card>
         </Grid>
 
-        {/* Contact Form Placeholder */}
+        {/* Contact Form */}
         <Grid item xs={12} md={8}>
           <Paper elevation={3} sx={{ p: 4 }}>
             <Typography variant="h4" component="h2" gutterBottom>
               Send Us a Message
             </Typography>
             <Typography variant="body1" color="text.secondary" paragraph>
-              Contact form functionality will be implemented soon. For now, please 
-              reach out to us using the contact information provided.
+              Have a question, suggestion, or partnership opportunity? We'd love to hear from you!
             </Typography>
             
-            {/* Placeholder form layout */}
-            <Box sx={{ mt: 4 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
-                  <Paper variant="outlined" sx={{ p: 2, backgroundColor: 'grey.50' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Name Field (Coming Soon)
-                    </Typography>
-                  </Paper>
+                  <TextField
+                    fullWidth
+                    label="Your Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                  />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <Paper variant="outlined" sx={{ p: 2, backgroundColor: 'grey.50' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Email Field (Coming Soon)
-                    </Typography>
-                  </Paper>
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                  <Paper variant="outlined" sx={{ p: 2, backgroundColor: 'grey.50' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Subject Field (Coming Soon)
-                    </Typography>
-                  </Paper>
+                  <TextField
+                    fullWidth
+                    label="Message"
+                    name="message"
+                    multiline
+                    rows={4}
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    placeholder="Tell us how we can help you..."
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                  <Paper variant="outlined" sx={{ p: 4, backgroundColor: 'grey.50' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Message Field (Coming Soon)
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button 
-                    variant="contained" 
-                    size="large" 
-                    disabled
-                    startIcon={<SendIcon />}
-                    sx={{ mt: 2 }}
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    disabled={isSubmitting}
+                    startIcon={isSubmitting ? <CircularProgress size={20} /> : <SendIcon />}
+                    sx={{ px: 4, py: 1.5 }}
                   >
-                    Send Message (Coming Soon)
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
                   </Button>
                 </Grid>
               </Grid>
@@ -139,7 +210,7 @@ const Contact = () => {
       </Grid>
 
       {/* FAQ Section */}
-      <Box sx={{ mt: 6 }}>
+      <Box sx={{ mt: 8 }}>
         <Typography variant="h3" component="h2" textAlign="center" gutterBottom>
           Frequently Asked Questions
         </Typography>
@@ -169,6 +240,22 @@ const Contact = () => {
           </Grid>
         </Grid>
       </Box>
+
+      {/* Snackbar for form submission feedback */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={submitStatus.type === 'success' ? 'success' : 'error'}
+          variant="filled"
+        >
+          {submitStatus.message}
+        </Alert>
+      </Snackbar>
     </Container>
   )
 }

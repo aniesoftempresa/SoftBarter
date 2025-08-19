@@ -51,6 +51,15 @@ const About = () => {
               efficiently and sustainably. We believe that everyone has something valuable 
               to offer, and our platform facilitates meaningful exchanges between community members.
             </Typography>
+            <Typography variant="body1" paragraph>
+              Our mission goes beyond simple transactions—we're building a movement that 
+              challenges traditional commerce by empowering individuals to trade directly 
+              with one another, fostering human connections and environmental responsibility.
+            </Typography>
+            <Typography variant="body1">
+              Through innovative technology and community-first values, we're creating 
+              an ecosystem where bartering becomes accessible, secure, and rewarding for everyone.
+            </Typography>
             <Typography variant="body1">
               By eliminating traditional monetary barriers, we enable people to access 
               goods and services based on mutual benefit and trust, fostering stronger 
