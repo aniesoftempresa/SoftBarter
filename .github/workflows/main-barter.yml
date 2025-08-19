@@ -29,29 +29,36 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      # Build backend, copy frontend build to wwwroot
+      # Clean wwwroot and copy frontend build output
+      - name: Remove old wwwroot (if exists)
+        run: |
+          if (Test-Path "backend/SoftBarter.API/wwwroot") {
+            Remove-Item -Recurse -Force "backend/SoftBarter.API/wwwroot"
+          }
+
+      - name: Create wwwroot
+        run: New-Item -ItemType Directory -Path "backend/SoftBarter.API/wwwroot"
+
+      - name: Copy frontend build to wwwroot
+        run: Copy-Item -Path "frontend/build/*" -Destination "backend/SoftBarter.API/wwwroot" -Recurse
+
+      # Build and publish backend
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
 
-      - name: Clean wwwroot
-        run: if exist backend\SoftBarter.API\wwwroot rmdir /s /q backend\SoftBarter.API\wwwroot
-
-      - name: Copy frontend build to wwwroot
-        run: mkdir backend\SoftBarter.API\wwwroot && xcopy /E /I /Y frontend\build\* backend\SoftBarter.API\wwwroot\
-
       - name: Build with dotnet
         run: dotnet build --configuration Release backend/SoftBarter.API/SoftBarter.API.csproj
 
       - name: dotnet publish
-        run: dotnet publish backend/SoftBarter.API/SoftBarter.API.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish backend/SoftBarter.API/SoftBarter.API.csproj -c Release -o published_app
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: published_app
 
   deploy:
     runs-on: windows-latest
