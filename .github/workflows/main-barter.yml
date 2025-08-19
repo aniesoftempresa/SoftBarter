@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy ASP.Net Core app to Azure Web App - softbarter
 
 on:
@@ -13,15 +10,36 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
 
+      # Build React frontend
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      # Build backend, copy frontend build to wwwroot
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
+
+      - name: Clean wwwroot
+        run: if exist backend\SoftBarter.API\wwwroot rmdir /s /q backend\SoftBarter.API\wwwroot
+
+      - name: Copy frontend build to wwwroot
+        run: mkdir backend\SoftBarter.API\wwwroot && xcopy /E /I /Y frontend\build\* backend\SoftBarter.API\wwwroot\
 
       - name: Build with dotnet
         run: dotnet build --configuration Release backend/SoftBarter.API/SoftBarter.API.csproj
@@ -38,13 +56,13 @@ jobs:
   deploy:
     runs-on: windows-latest
     needs: build
-    
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-      
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
