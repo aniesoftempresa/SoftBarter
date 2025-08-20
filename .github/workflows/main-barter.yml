@@ -29,6 +29,16 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      # Debug: show build folder contents
+      - name: List frontend/build contents
+        run: |
+          if (Test-Path "frontend/build") {
+            Get-ChildItem -Path frontend/build -Recurse
+          } else {
+            Write-Host "frontend/build does not exist!"
+            exit 1
+          }
+
       # Clean wwwroot and copy frontend build output
       - name: Remove old wwwroot (if exists)
         run: |
@@ -37,10 +47,10 @@ jobs:
           }
 
       - name: Create wwwroot
-        run: New-Item -ItemType Directory -Path "backend/SoftBarter.API/wwwroot"
+        run: New-Item -ItemType Directory -Path "backend/SoftBarter.API/wwwroot" -Force
 
       - name: Copy frontend build to wwwroot
-        run: Copy-Item -Path "frontend/build/*" -Destination "backend/SoftBarter.API/wwwroot" -Recurse
+        run: Copy-Item -Path "frontend/build/*" -Destination "backend/SoftBarter.API/wwwroot" -Recurse -Force
 
       # Build and publish backend
       - name: Set up .NET Core
