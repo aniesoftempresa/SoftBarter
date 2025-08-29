@@ -11,6 +11,7 @@ import {
   Avatar,
   Rating,
 } from '@mui/material'
+import { Link } from 'react-router-dom'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import GroupIcon from '@mui/icons-material/Group'
 import RecyclingIcon from '@mui/icons-material/Recycling'
@@ -18,6 +19,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import SearchIcon from '@mui/icons-material/Search'
 import HandshakeIcon from '@mui/icons-material/Handshake'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import HomeIcon from '@mui/icons-material/Home'
 
 const Home = () => {
   const testimonials = [
@@ -85,6 +87,28 @@ const Home = () => {
           for what you need in a sustainable, community-driven marketplace.
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Button
+            component={Link}
+            to="/"
+            variant="contained"
+            size="large"
+            startIcon={<HomeIcon />}
+            sx={{
+              backgroundColor: '#FFD700',
+              color: '#000',
+              px: 4,
+              py: 1.5,
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              '&:hover': {
+                backgroundColor: '#FFC107',
+                transform: 'translateY(-2px)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Home
+          </Button>
           <Button
             variant="contained"
             size="large"
