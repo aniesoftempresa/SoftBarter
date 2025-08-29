@@ -15,7 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Build React frontend
+      # Debug: List repo structure to find actual frontend folder
+      - name: List repo contents recursively
+        run: Get-ChildItem -Recurse
+
+      # Build React frontend (update 'frontend' if your folder is different!)
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -29,7 +33,6 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      # Debug: show build folder contents
       - name: List frontend/build contents
         run: |
           if (Test-Path "frontend/build") {
@@ -39,7 +42,6 @@ jobs:
             exit 1
           }
 
-      # Remove and create wwwroot
       - name: Remove old wwwroot (if exists)
         run: |
           if (Test-Path "backend/SoftBarter.API/wwwroot") {
@@ -47,7 +49,6 @@ jobs:
           }
           New-Item -ItemType Directory -Path "backend/SoftBarter.API/wwwroot" -Force
 
-      # Copy frontend build to wwwroot
       - name: Copy frontend build to wwwroot
         run: Copy-Item -Path "frontend/build/*" -Destination "backend/SoftBarter.API/wwwroot" -Recurse -Force
 
