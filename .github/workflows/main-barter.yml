@@ -29,6 +29,11 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: List repo contents before build
+        run: |
+          Write-Host "Repo root:"
+          Get-ChildItem -Recurse
+
       - name: Build frontend
         working-directory: frontend
         run: npm run build
