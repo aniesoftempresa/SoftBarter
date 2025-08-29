@@ -15,8 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Debug: List repo structure to find actual frontend folder
-      - name: List repo contents recursively
+      # Debug: List repo structure ONCE to find actual frontend folder
+      - name: List repo contents
         run: Get-ChildItem -Recurse
 
       # Build React frontend (update 'frontend' if your folder is different!)
@@ -26,16 +26,11 @@ jobs:
           node-version: '18'
 
       - name: Install frontend dependencies
-        working-directory: frontend
+        working-directory: frontend  # UPDATE if needed!
         run: npm ci
 
-      - name: List repo contents before build
-        run: |
-          Write-Host "Repo root:"
-          Get-ChildItem -Recurse
-
       - name: Build frontend
-        working-directory: frontend
+        working-directory: frontend  # UPDATE if needed!
         run: npm run build
 
       - name: List frontend/build contents
