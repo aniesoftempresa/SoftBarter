@@ -10,49 +10,33 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read
+      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
 
-      # Debug: List repo structure ONCE to find actual frontend folder
-      - name: List repo contents
-        run: Get-ChildItem -Recurse
-
-      # Build React frontend (update 'frontend' if your folder is different!)
+      # Build React frontend (update path if your ClientApp is elsewhere)
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
       - name: Install frontend dependencies
-        working-directory: frontend  # UPDATE if needed!
+        working-directory: backend/SoftBarter.API/ClientApp
         run: npm ci
 
       - name: Build frontend
-        working-directory: frontend  # UPDATE if needed!
+        working-directory: backend/SoftBarter.API/ClientApp
         run: npm run build
 
-      - name: List frontend/build contents
-        run: |
-          if (Test-Path "frontend/build") {
-            Get-ChildItem -Path frontend/build -Recurse
-          } else {
-            Write-Host "frontend/build does not exist!"
-            exit 1
-          }
-
-      - name: Remove old wwwroot (if exists)
+      # Copy React build output to wwwroot
+      - name: Copy frontend build to wwwroot
         run: |
           if (Test-Path "backend/SoftBarter.API/wwwroot") {
             Remove-Item -Recurse -Force "backend/SoftBarter.API/wwwroot"
           }
-          New-Item -ItemType Directory -Path "backend/SoftBarter.API/wwwroot" -Force
+          Copy-Item -Path "backend/SoftBarter.API/ClientApp/build" -Destination "backend/SoftBarter.API/wwwroot" -Recurse -Force
 
-      - name: Copy frontend build to wwwroot
-        run: Copy-Item -Path "frontend/build/*" -Destination "backend/SoftBarter.API/wwwroot" -Recurse -Force
-
-      # Build and publish backend
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
@@ -62,24 +46,24 @@ jobs:
         run: dotnet build --configuration Release backend/SoftBarter.API/SoftBarter.API.csproj
 
       - name: dotnet publish
-        run: dotnet publish backend/SoftBarter.API/SoftBarter.API.csproj -c Release -o published_app
+        run: dotnet publish backend/SoftBarter.API/SoftBarter.API.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: published_app
+          path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
     runs-on: windows-latest
     needs: build
-
+    
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-
+      
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
