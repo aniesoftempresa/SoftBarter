@@ -15,6 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: List repo contents
+        run: Get-ChildItem -Recurse
+
       # Build React frontend (update path if your ClientApp is elsewhere)
       - name: Set up Node.js
         uses: actions/setup-node@v4
