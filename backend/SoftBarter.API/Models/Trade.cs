@@ -22,6 +22,27 @@ namespace SoftBarter.API.Models
         [StringLength(100)]
         public string ItemSought { get; set; } = string.Empty;
 
+        [StringLength(50)]
+        public string? Category { get; set; }
+
+        [StringLength(100)]
+        public string? Location { get; set; }
+
+        [Range(0, double.MaxValue)]
+        public decimal? EstimatedValue { get; set; }
+
+        public bool IsNegotiable { get; set; } = true;
+
+        public DateTime? ExpiryDate { get; set; }
+
+        [StringLength(500)]
+        public string? ImageUrls { get; set; } // JSON array of image URLs
+
+        [StringLength(100)]
+        public string? Condition { get; set; } // New, Used, Fair, etc.
+
+        public int ViewCount { get; set; } = 0;
+
         public TradeStatus Status { get; set; } = TradeStatus.Active;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -33,12 +54,16 @@ namespace SoftBarter.API.Models
 
         // Navigation property
         public User User { get; set; } = null!;
+        public ICollection<Offer> Offers { get; set; } = new List<Offer>();
+        public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     }
 
     public enum TradeStatus
     {
         Active,
         Completed,
-        Cancelled
+        Cancelled,
+        Expired,
+        UnderOffer
     }
 }

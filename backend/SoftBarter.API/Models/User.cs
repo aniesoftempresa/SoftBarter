@@ -28,5 +28,8 @@ namespace SoftBarter.API.Models
 
         // Navigation property
         public ICollection<Trade> Trades { get; set; } = new List<Trade>();
+        public ICollection<Offer> Offers { get; set; } = new List<Offer>();
+        public ICollection<Transaction> TradesAsTrader { get; set; } = new List<Transaction>();
+        public ICollection<Transaction> TradesAsOfferor { get; set; } = new List<Transaction>();
     }
 }

@@ -11,6 +11,8 @@ namespace SoftBarter.API.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Trade> Trades { get; set; }
+        public DbSet<Offer> Offers { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +31,44 @@ namespace SoftBarter.API.Data
                       .WithMany(u => u.Trades)
                       .HasForeignKey(t => t.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure Offer entity
+            modelBuilder.Entity<Offer>(entity =>
+            {
+                entity.HasOne(o => o.Trade)
+                      .WithMany(t => t.Offers)
+                      .HasForeignKey(o => o.TradeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(o => o.Offeror)
+                      .WithMany(u => u.Offers)
+                      .HasForeignKey(o => o.OfferorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure Transaction entity
+            modelBuilder.Entity<Transaction>(entity =>
+            {
+                entity.HasOne(t => t.Trade)
+                      .WithMany(tr => tr.Transactions)
+                      .HasForeignKey(t => t.TradeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(t => t.AcceptedOffer)
+                      .WithMany()
+                      .HasForeignKey(t => t.AcceptedOfferId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(t => t.Trader)
+                      .WithMany(u => u.TradesAsTrader)
+                      .HasForeignKey(t => t.TraderId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(t => t.Offeror)
+                      .WithMany(u => u.TradesAsOfferor)
+                      .HasForeignKey(t => t.OfferorId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Seed sample data
@@ -68,6 +108,11 @@ namespace SoftBarter.API.Data
                     Description = "Trading a first edition vintage book for a rare coin from the 1800s.",
                     ItemOffered = "Vintage Book",
                     ItemSought = "Rare Coin",
+                    Category = "Collectibles",
+                    Location = "New York, NY",
+                    EstimatedValue = 150.00m,
+                    IsNegotiable = true,
+                    Condition = "Good",
                     Status = TradeStatus.Active,
                     UserId = 1,
                     CreatedAt = now,
@@ -80,6 +125,11 @@ namespace SoftBarter.API.Data
                     Description = "Beautiful handmade pottery in exchange for professional art supplies.",
                     ItemOffered = "Handmade Pottery",
                     ItemSought = "Art Supplies",
+                    Category = "Arts & Crafts",
+                    Location = "Los Angeles, CA",
+                    EstimatedValue = 75.00m,
+                    IsNegotiable = true,
+                    Condition = "New",
                     Status = TradeStatus.Active,
                     UserId = 2,
                     CreatedAt = now,
