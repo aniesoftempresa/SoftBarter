@@ -34,12 +34,16 @@ namespace SoftBarter.API.Data
             // Seed sample data
             var now = DateTime.UtcNow;
             
+            // Default password for seed users: "password123"
+            var defaultPasswordHash = BCrypt.Net.BCrypt.HashPassword("password123");
+            
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     Id = 1,
                     Name = "John Doe",
                     Email = "john.doe@example.com",
+                    PasswordHash = defaultPasswordHash,
                     Bio = "Avid trader looking for interesting exchanges.",
                     CreatedAt = now,
                     UpdatedAt = now
@@ -49,6 +53,7 @@ namespace SoftBarter.API.Data
                     Id = 2,
                     Name = "Jane Smith",
                     Email = "jane.smith@example.com",
+                    PasswordHash = defaultPasswordHash,
                     Bio = "Collector and trader of vintage items.",
                     CreatedAt = now,
                     UpdatedAt = now

@@ -15,6 +15,10 @@ namespace SoftBarter.API.Models
         [StringLength(255)]
         public string Email { get; set; } = string.Empty;
 
+        [Required]
+        [StringLength(255)]
+        public string PasswordHash { get; set; } = string.Empty;
+
         [StringLength(500)]
         public string? Bio { get; set; }
 
